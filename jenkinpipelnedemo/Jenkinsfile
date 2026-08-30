@@ -13,17 +13,21 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                bat 'mvn clean package'
-            }
+stage('Build') {
+    steps {
+        dir('jenkinpipelnedemo') {
+            bat 'mvn clean package'
         }
+    }
+}
 
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
+stage('Test') {
+    steps {
+        dir('jenkinpipelnedemo') {
+            bat 'mvn test'
         }
+    }
+
 
         stage('Deploy') {
             steps {
