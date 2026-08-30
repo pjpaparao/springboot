@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven_3.9'
+        jdk 'JDK_17'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -10,14 +15,29 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvnw clean package'
+                dir('jenkinpipelnedemo') {
+                    bat 'mvn clean package'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                bat 'mvnw test'
+                dir('jenkinpipelnedemo') {
+                    bat 'mvn test'
+                }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying Spring Boot app...'
+            }
+        }
+    }
+
+    post {
+        success { echo 'Pipeline completed successfully!' }
+        failure { echo 'Pipeline failed!' }
     }
 }
