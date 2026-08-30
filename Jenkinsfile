@@ -29,11 +29,15 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                echo 'Deploying Spring Boot app...'
-            }
+stage('Deploy') {
+    steps {
+        dir('jenkinpipelnedemo') {
+            bat 'docker build -t springboot-app .'
+            bat 'docker rm -f springboot-app-container || exit 0'
+            bat 'docker run -d --name springboot-app-container -p 8080:8080 springboot-app'
         }
+    }
+}
     }
 
     post {
