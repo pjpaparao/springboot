@@ -32,9 +32,11 @@ pipeline {
 stage('Deploy') {
     steps {
         dir('jenkinpipelnedemo') {
-            bat 'docker build -t springboot-app .'
-            bat 'docker rm -f springboot-app-container || exit 0'
-            bat 'docker run -d --name springboot-app-container -p 8080:8080 springboot-app'
+            withEnv(['DOCKER_HOST=tcp://localhost:2375']) {
+                bat 'docker build -t springboot-app .'
+                bat 'docker rm -f springboot-app-container || exit 0'
+                bat 'docker run -d --name springboot-app-container -p 8080:8080 springboot-app'
+            }
         }
     }
 }
