@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven_3.9'   // configure Maven in Jenkins global tools
-        jdk 'JDK_17'        // configure JDK in Jenkins global tools
+        maven 'Maven_3.9'
+        jdk 'JDK_17'
     }
 
     stages {
@@ -13,41 +13,42 @@ pipeline {
             }
         }
 
-stage('Build') {
-    steps {
-        dir('jenkinpipelnedemo') {
-            bat 'mvn clean package'
+        stage('Build') {
+            steps {
+                dir('jenkinpipelnedemo') {
+                    bat 'mvn clean package'
+                }
+            }
         }
-    }
-}
 
-stage('Test') {
-    steps {
-        dir('jenkinpipelnedemo') {
-            bat 'mvn test'
+        stage('Test') {
+            steps {
+                dir('jenkinpipelnedemo') {
+                    bat 'mvn test'
+                }
+            }
         }
-    }
 
-
-stage('Deploy') {
-    steps {
-        dir('jenkinpipelnedemo') {
-            bat 'docker network create springboot-net || exit 0'
-            bat 'docker volume create mysql-data || exit 0'
-            bat '''
-            docker ps -a --format "{{.Names}}" | findstr /x "mysql-db" >nul
-            if errorlevel 1 (
-                docker run -d --name mysql-db --network springboot-net -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=mydb -p 3306:3306 -v mysql-data:/var/lib/mysql mysql:8
-            ) else (
-                echo mysql-db already exists, skipping creation
-            )
-            '''
-            bat 'docker build -t springboot-app .'
-            bat 'docker rm -f springboot-app-container || exit 0'
-            bat 'docker run -d --name springboot-app-container --network springboot-net -p 8080:8080 springboot-app'
+        stage('Deploy') {
+            steps {
+                dir('jenkinpipelnedemo') {
+                    bat 'docker network create springboot-net || exit 0'
+                    bat 'docker volume create mysql-data || exit 0'
+                    bat '''
+                    docker ps -a --format "{{.Names}}" | findstr /x "mysql-db" >nul
+                    if errorlevel 1 (
+                        docker run -d --name mysql-db --network springboot-net -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=mydb -p 3306:3306 -v mysql-data:/var/lib/mysql mysql:8
+                        timeout /t 20
+                    ) else (
+                        echo mysql-db already exists, skipping creation
+                    )
+                    '''
+                    bat 'docker build -t springboot-app .'
+                    bat 'docker rm -f springboot-app-container || exit 0'
+                    bat 'docker run -d --name springboot-app-container --network springboot-net -p 8080:8080 springboot-app'
+                }
+            }
         }
-    }
-}
     }
 
     post {
