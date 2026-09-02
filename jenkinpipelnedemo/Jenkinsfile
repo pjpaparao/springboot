@@ -26,8 +26,8 @@ pipeline {
             steps {
                 dir('jenkinpipelnedemo') {
                     // Recreates services on the shared Docker Compose network
-                    bat 'docker compose down'
-                    bat 'docker compose up -d --build --force-recreate'
+                    bat 'docker-compose down'
+                    bat 'docker-compose up -d --build --force-recreate'
                 }
             }
         }
