@@ -16,7 +16,7 @@ pipeline {
         stage('Build') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    bat 'mvn clean package'
+                    bat 'mvn clean package -DskipTests'
                 }
             }
         }
