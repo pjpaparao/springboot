@@ -33,7 +33,7 @@ pipeline {
             steps {
                 dir('jenkinpipelnedemo') {
                     bat 'docker-compose down'
-                    bat 'docker-compose up -d --build'
+                    bat 'docker-compose up -d --build --force-recreate'
                 }
             }
         }
