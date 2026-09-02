@@ -1,39 +1,38 @@
 pipeline {
     agent any
+
     tools {
         maven 'Maven_3.9'
         jdk 'JDK_17'
     }
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/pjpaparao/springboot.git'
             }
         }
-        stage('Build') {
+
+        stage('Build & Test') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    bat 'mvn clean package -DskipTests'
+                    // Builds the JAR and runs unit tests in one execution step
+                    bat 'mvn clean package'
                 }
             }
         }
-        stage('Test') {
-            steps {
-                dir('jenkinpipelnedemo') {
-                    bat 'mvn test'
-                }
-            }
-        }
+
         stage('Deploy') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    // Added -v to purge stale/corrupted MySQL volumes on each deployment
-                    bat 'docker compose down -v'
+                    // Recreates services on the shared Docker Compose network
+                    bat 'docker compose down'
                     bat 'docker compose up -d --build --force-recreate'
                 }
             }
         }
     }
+
     post {
         success {
             echo 'Pipeline completed successfully!'
