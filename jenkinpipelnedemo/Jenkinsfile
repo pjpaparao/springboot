@@ -22,16 +22,17 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                dir('jenkinpipelnedemo') {
-                    // Recreates services on the shared Docker Compose network
-                    bat 'docker-compose down'
-                    bat 'docker-compose up -d --build --force-recreate'
-                }
+       stage('Deploy') {
+          steps {
+              dir('jenkinpipelnedemo') {
+                withEnv(['DOCKER_HOST=tcp://localhost:2375']) {
+                bat 'docker-compose down'
+                bat 'docker-compose up -d --build'
             }
         }
     }
+  }    
+}
 
     post {
         success {
