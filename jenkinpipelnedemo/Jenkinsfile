@@ -1,18 +1,15 @@
 pipeline {
     agent any
-
     tools {
         maven 'Maven_3.9'
         jdk 'JDK_17'
     }
-
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/pjpaparao/springboot.git'
             }
         }
-
         stage('Build') {
             steps {
                 dir('jenkinpipelnedemo') {
@@ -20,7 +17,6 @@ pipeline {
                 }
             }
         }
-
         stage('Test') {
             steps {
                 dir('jenkinpipelnedemo') {
@@ -28,17 +24,16 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    bat 'docker-compose down'
-                    bat 'docker-compose up -d --build --force-recreate'
+                    // Added -v to purge stale/corrupted MySQL volumes on each deployment
+                    bat 'docker compose down -v'
+                    bat 'docker compose up -d --build --force-recreate'
                 }
             }
         }
     }
-
     post {
         success {
             echo 'Pipeline completed successfully!'
