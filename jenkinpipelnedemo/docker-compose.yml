@@ -1,9 +1,11 @@
 version: '3.8'
+
 services:
   # MySQL Database Container
   mysql-db:
     image: mysql:8.0
     container_name: mysql-container
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: jpa
@@ -16,7 +18,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-  # Your Spring Boot Container
+
+  # Spring Boot Container
   app:
     build: .
     container_name: springboot-app
@@ -29,5 +32,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/jpa?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+
 volumes:
   mysql_db_data:
