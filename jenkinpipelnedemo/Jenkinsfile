@@ -1,44 +1,26 @@
 pipeline {
     agent any
+
     tools {
         maven 'Maven_3.9'
         jdk 'JDK_17'
     }
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/pjpaparao/springboot.git'
             }
         }
-        stage('Start Database') {
-            steps {
-                bat 'docker network create springboot-net || exit 0'
-                bat 'docker volume create mysql-data || exit 0'
-                bat '''
-                docker ps -a --format "{{.Names}}" | findstr /x "mysql-db" >nul
-                if errorlevel 1 (
-                    docker run -d --name mysql-db --network springboot-net -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=jpa -v mysql-data:/var/lib/mysql mysql:8
-                )
-                '''
-                // Wait until MySQL is ready to accept SQL connections
-                bat '''
-                :wait_loop
-                docker exec mysql-db mysqladmin ping -u root -proot --silent
-                if errorlevel 1 (
-                    timeout /t 5
-                    goto wait_loop
-                )
-                '''
-            }
-        }
+
         stage('Build') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    // Skip tests here so testing happens strictly in the Test stage
-                    bat 'mvn clean package -DskipTests'
+                    bat 'mvn clean package'
                 }
             }
         }
+
         stage('Test') {
             steps {
                 dir('jenkinpipelnedemo') {
@@ -46,18 +28,23 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                 dir('jenkinpipelnedemo') {
-                    bat 'docker build -t springboot-app .'
-                    bat 'docker rm -f springboot-app-container || exit 0'
-                    bat 'docker run -d --name springboot-app-container --network springboot-net -p 8080:8080 springboot-app'
+                    bat 'docker-compose down'
+                    bat 'docker-compose up -d --build'
                 }
             }
         }
     }
+
     post {
-        success { echo 'Pipeline completed successfully!' }
-        failure { echo 'Pipeline failed!' }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
     }
 }
